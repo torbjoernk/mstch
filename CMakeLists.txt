@@ -1,13 +1,16 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(mstch)
 
-option(WITH_UNIT_TESTS "enable building unit test executable" OFF)
-option(WITH_BENCHMARK "enable building benchmark executable" OFF)
+get_directory_property(hasParent PARENT_DIRECTORY)
+if(hasParent)
+  set(mstch_IS_MASTER_PROJECT OFF)
+else()
+  set(mstch_IS_MASTER_PROJECT ON)
+endif()
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
-set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+# unit tests and benchmarks are off by default for mstch being a subproject
+option(WITH_UNIT_TESTS "enable building unit test executable" ${mstch_IS_MASTER_PROJECT})
+option(WITH_BENCHMARK "enable building benchmark executable" ${mstch_IS_MASTER_PROJECT})
 
 set(mstch_VERSION 1.0.2)
 
@@ -22,7 +25,53 @@ if(NOT MSVC)
   add_compile_options(-Wall -Wextra)
 endif()
 
+find_package(Boost 1.54 REQUIRED)
+
 add_subdirectory(src)
+
+add_library(mstch
+    ${mstch_SOURCES})
+
+set_target_properties(mstch
+    PROPERTIES VERSION ${mstch_VERSION}
+               SOVERSION ${mstch_SOVERSION})
+target_include_directories(mstch
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:include>
+    PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+target_link_libraries(mstch
+    PUBLIC Boost::boost)
+
+install(
+    TARGETS mstch EXPORT mstchTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
+install(
+    FILES "${PROJECT_SOURCE_DIR}/include/mstch/mstch.hpp"
+    DESTINATION include/mstch
+    COMPONENT Devel)
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config-version.cmake"
+    VERSION ${mstch_VERSION}
+    COMPATIBILITY AnyNewerVersion)
+export(
+    EXPORT mstchTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-targets.cmake"
+    NAMESPACE mstch::)
+configure_file(
+    "${PROJECT_SOURCE_DIR}/cmake/mstch-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config.cmake")
+install(
+    EXPORT mstchTargets
+    FILE mstch-targets.cmake
+    NAMESPACE mstch::
+    DESTINATION lib/cmake/mstch)
+install(FILES
+    "${PROJECT_SOURCE_DIR}/cmake/mstch-config.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config-version.cmake"
+    DESTINATION lib/cmake/mstch
+    COMPONENT Devel)
 
 if(WITH_UNIT_TESTS)
   enable_testing()
@@ -31,6 +80,7 @@ if(WITH_UNIT_TESTS)
 endif()
 
 if(WITH_BENCHMARK)
+  # deactivate self-tests for benchmark dependency
   set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
   set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
   set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
