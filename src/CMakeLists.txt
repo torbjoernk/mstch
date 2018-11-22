@@ -1,67 +1,15 @@
-find_package(Boost 1.54 REQUIRED)
-
-set(mstch_INCLUDE_DIR
-    ${PROJECT_SOURCE_DIR}/include CACHE STRING "mstch include directory")
-
-include_directories(
-    ${mstch_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR})
-
-set(SRC
-    state/in_section.cpp
-    state/outside_section.cpp
-    state/render_state.hpp
-    visitor/get_token.hpp
-    visitor/has_token.hpp
-    visitor/is_node_empty.hpp
-    visitor/render_node.hpp
-    visitor/render_section.hpp
-    mstch.cpp
-    render_context.cpp
-    template_type.cpp
-    token.cpp
-    utils.cpp)
-
-add_library(mstch ${SRC})
-
-set_property(TARGET mstch PROPERTY VERSION ${mstch_VERSION})
-set_property(TARGET mstch PROPERTY SOVERSION ${mstch_SOVERSION})
-
-target_include_directories(mstch PUBLIC ${Boost_INCLUDE_DIR})
-
-install(
-    TARGETS mstch EXPORT mstchTargets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-
-install(
-    FILES "${PROJECT_SOURCE_DIR}/include/mstch/mstch.hpp"
-    DESTINATION include/mstch
-    COMPONENT Devel)
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config-version.cmake"
-    VERSION ${mstch_VERSION}
-    COMPATIBILITY AnyNewerVersion)
-
-export(
-    EXPORT mstchTargets
-    FILE "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-targets.cmake"
-    NAMESPACE mstch::)
-
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/mstch-config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config.cmake")
-
-install(
-    EXPORT mstchTargets
-    FILE mstch-targets.cmake
-    NAMESPACE mstch::
-    DESTINATION lib/cmake/mstch)
-
-install(FILES
-    "${PROJECT_SOURCE_DIR}/cmake/mstch-config.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/mstch/mstch-config-version.cmake"
-    DESTINATION lib/cmake/mstch
-    COMPONENT Devel)
+set(mstch_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/state/in_section.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/state/outside_section.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/state/render_state.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/visitor/get_token.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/visitor/has_token.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/visitor/is_node_empty.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/visitor/render_node.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/visitor/render_section.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/mstch.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/render_context.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/template_type.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/token.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils.cpp
+    PARENT_SCOPE)

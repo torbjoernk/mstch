@@ -1,11 +1,3 @@
-find_package(Boost 1.54 REQUIRED)
-
-include_directories(
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/vendor/Catch/single_include
-  ${CMAKE_SOURCE_DIR}/vendor/rapidjson/include
-  ${Boost_INCLUDE_DIR})
-
 file(GLOB data_files RELATIVE
   "${CMAKE_SOURCE_DIR}/test/data"
   "${CMAKE_SOURCE_DIR}/test/data/*.hpp")
@@ -29,8 +21,10 @@ add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp
   COMMAND headerize --output ${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp --namespace mstchtest ${genargs}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/data/)
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp PROPERTIES GENERATED TRUE)
-add_custom_target(test_data_hpp DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp)
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp
+    PROPERTIES GENERATED TRUE)
+add_custom_target(test_data_hpp
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/test_data.hpp)
 
 file(GLOB specs_files RELATIVE
   "${CMAKE_SOURCE_DIR}/vendor/spec/specs"
@@ -47,12 +41,22 @@ add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp
   COMMAND headerize --output ${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp --namespace mstchtest ${specsargs}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vendor/spec/specs/)
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp PROPERTIES GENERATED TRUE)
-add_custom_target(specs_data_hpp DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp)
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp
+    PROPERTIES GENERATED TRUE)
+add_custom_target(specs_data_hpp
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/specs_data.hpp)
 
-add_executable(mstch_test test_main.cpp)
-target_link_libraries(mstch_test mstch)
-add_dependencies(mstch_test test_data_hpp specs_data_hpp)
+add_executable(mstch_test
+    ${CMAKE_CURRENT_LIST_DIR}/test_main.cpp)
+target_link_libraries(mstch_test
+    PUBLIC mstch)
+target_include_directories(mstch_test
+    PRIVATE ${CMAKE_SOURCE_DIR}/vendor/Catch/single_include
+            ${CMAKE_SOURCE_DIR}/vendor/rapidjson/include
+            ${CMAKE_CURRENT_BINARY_DIR})
+add_dependencies(mstch_test
+    test_data_hpp
+    specs_data_hpp)
 
 foreach(test ${tests})
   add_test(NAME ${test} COMMAND mstch_test ${test})
