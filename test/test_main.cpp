@@ -65,7 +65,7 @@ mstch::node parse_with_rapidjson(const std::string& str) {
 }
 
 #define SPECS_TEST(x) TEST_CASE("specs_" #x) { \
-  using boost::get; \
+  using std::get; \
   auto data = parse_with_rapidjson(x ## _json); \
   for (auto& test_item: get<mstch::array>(get<mstch::map>(data)["tests"])) {\
     auto test = get<mstch::map>(test_item); \

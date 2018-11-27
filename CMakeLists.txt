@@ -22,10 +22,10 @@ set(mstch_SOVERSION "${mstch_VERSION_MAJOR}.${mstch_VERSION_MINOR}")
 unset(mstch_VERSION_MATCH)
 
 if(NOT MSVC)
-  add_compile_options(-Wall -Wextra)
+  add_compile_options(-std=c++17 -Wall -Wextra -O3)
+else()
+  add_compile_options(/std:c++latest)
 endif()
-
-find_package(Boost 1.54 REQUIRED)
 
 add_subdirectory(src)
 
@@ -39,8 +39,6 @@ target_include_directories(mstch
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:include>
     PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(mstch
-    PUBLIC Boost::boost)
 
 install(
     TARGETS mstch EXPORT mstchTargets

@@ -1,16 +1,18 @@
 #pragma once
 
-#include <boost/variant/static_visitor.hpp>
-
 #include "mstch/mstch.hpp"
 
 namespace mstch {
 
-class is_node_empty: public boost::static_visitor<bool> {
+class is_node_empty {
  public:
   template<class T>
   bool operator()(const T&) const {
     return false;
+  }
+
+  bool operator()(const empty&) const {
+    return true;
   }
 
   bool operator()(const std::nullptr_t&) const {
@@ -18,6 +20,10 @@ class is_node_empty: public boost::static_visitor<bool> {
   }
 
   bool operator()(const int& value) const {
+    return value == 0;
+  }
+
+  bool operator()(const unsigned int& value) const {
     return value == 0;
   }
 
@@ -30,11 +36,11 @@ class is_node_empty: public boost::static_visitor<bool> {
   }
 
   bool operator()(const std::string& value) const {
-    return value == "";
+    return value.empty();
   }
 
   bool operator()(const array& array) const {
-    return array.size() == 0;
+    return array.empty();
   }
 };
 
