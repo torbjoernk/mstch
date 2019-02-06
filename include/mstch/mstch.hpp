@@ -118,6 +118,8 @@ struct node : std::variant<
   node() : base_type(std::in_place_type<std::monostate>) {}
 
   explicit node(const char* value) : base_type(std::in_place_type<std::string>, value) {}
+  
+  node& operator=(const char* value) { return *this = std::string{value}; }
 
   base_type& base() { return *this; }
   base_type const& base() const { return *this; }
