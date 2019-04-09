@@ -58,6 +58,8 @@ add_dependencies(mstch_test
     test_data_hpp
     specs_data_hpp)
 
+list(APPEND tests "missing_key_is_ignored")
+
 foreach(test ${tests})
   add_test(NAME ${test} COMMAND mstch_test ${test})
 endforeach(test)
