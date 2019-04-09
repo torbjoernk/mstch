@@ -43,6 +43,8 @@ const mstch::node& render_context::find_node(
     for (auto& node: current_nodes)
       if (mstch::visit(has_token(token), *node))
         return mstch::visit(get_token(token, *node), *node);
+  if (mstch::config::throw_on_missing_key)
+    throw key_not_found{token};
   return null_node;
 }
 
